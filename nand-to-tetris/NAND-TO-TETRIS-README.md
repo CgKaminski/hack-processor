@@ -18,14 +18,14 @@ In this directory, you will find the HDL-1 code that I initially developed while
 
 ## Contents
 
-- **/src/logic-gates**: Contains the logic gate implementations, such as the 
+- **/src/project01**: Contains the logic gate implementations, such as the 
  NAND, AND, OR, and other gates, along with any additional components required
  for the construction of basic logic circuits.
 
-- **/src/alu-chipss**: Includes the building blocks for more complex components,
+- **/src/project02**: Includes the building blocks for more complex components,
  such as multiplexers, demultiplexers, and adders.
 
-- **/src/memory-chips**: Focuses on building sequential chips, including
+- **/src/project03**: Focuses on building sequential chips, including
  registers and memory units.
 
 ## Usage
