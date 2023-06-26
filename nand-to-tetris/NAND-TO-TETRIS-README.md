@@ -13,13 +13,11 @@ foundation of my self-made computer and serves as a reference point for the subs
 
 ## Contents
 
-- **/**: Contains the logic gate implementations, such as the NAND, AND, OR, and other gates, along with any additional components required for the construction of basic logic circuits.
+- **/src/logic-gates**: Contains the logic gate implementations, such as the NAND, AND, OR, and other gates, along with any additional components required for the construction of basic logic circuits.
 
-- **/src/logic-gates**: Includes the building blocks for more complex components, such as multiplexers, demultiplexers, and adders.
+- **/src/alu-chipss**: Includes the building blocks for more complex components, such as multiplexers, demultiplexers, and adders.
 
-- **/src/alu-chips**: Focuses on building sequential chips, including registers and memory units.
-
-- **/src/memory-chips**, **/src/pc-chips : Implements the CPU, control unit, and other necessary components for a basic computer architecture.
+- **/src/memory-chips**: Focuses on building sequential chips, including registers and memory units.
 
 ## Usage
 
