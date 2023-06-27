@@ -28,6 +28,9 @@ In this directory, you will find the HDL-1 code that I initially developed while
 - **/src/project03**: Focuses on building sequential chips, including
  registers and memory units.
 
+- **/src/project04**: Introduces hack-computer assmebly langauge, including 2
+  projects; programming a mutiplyer and a I/O reader.
+
 ## Usage
 
 Feel free to explore the code within each project directory to understand the 
