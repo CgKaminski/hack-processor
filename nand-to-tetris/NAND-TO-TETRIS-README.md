@@ -31,6 +31,8 @@ In this directory, you will find the HDL-1 code that I initially developed while
 - **/src/project04**: Introduces hack-computer assmebly langauge, including 2
   projects; programming a mutiplyer and a I/O reader.
 
+- **/src/project05**: Packages all previous parts into the hack-computer.
+
 ## Usage
 
 Feel free to explore the code within each project directory to understand the 
