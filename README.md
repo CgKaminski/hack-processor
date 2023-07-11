@@ -1,1 +1,1 @@
-![hack processor logo](docs/hack-processor-title.drawio.png)
+![hack processor logo](docs/hack-processor-logo.png)
