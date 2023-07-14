@@ -20,30 +20,62 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+`include "alu.sv"
+`include "pc.sv"
+
 module cpu(input logic [15:0] inM, instruction,
            input logic reset, clk,
-           output logic [15:0] outM,
-           output logic [14:0] addressM, pc,
+           output logic [15:0] outM, pc,
+           output logic [14:0] addressM,
            output logic writeM);
 
+  reg [15:0] a_register;
+  reg [15:0] d_register;
+  logic zr, ng, po, lezr, eqzr, gtzr, jump, a_load;
+  logic jmp, do_jump;
+  logic [15:0] a_instruction, aluA;
+
+  alu alu_init (
+    .x(aluA),
+    .y(d_register),
+    .zx(instruction[11]),
+    .nx(instruction[10]),
+    .zy(instruction[9]),
+    .ny(instruction[8]),
+    .f(instruction[7]),
+    .no(instruction[6]),
+    .out(outM),
+    .zr(zr),
+    .ng(ng)
+  );
+
+  pc pc_init (
+    .in(a_register),
+    .load(do_jump),
+    .inc(~do_jump),
+    .reset(reset),
+    .clk(clk),
+    .out(pc)
+  );
   always_ff @(posedge clk) begin
     // CPU instruction decoding
     // if (instruction[15] == 0) then A-instruction
     // else C-instruction
-    assign a_instruction = (instruction[15] == 1) ? aluOut: instruction;
+    assign a_instruction = (instruction[15] == 1) ? outM: instruction;
   
     // A-Register
     assign a_load = (instruction[15] == 0) ? 1'b1: 1'b0;
-    ARegister #(16) a_register(.in(a_instruction), .load(a_load), .out(a_out));
-    assign aluA = (instruction[12] == 0) ? a_out: inM;
+    assign a_register = (a_load) ? a_instruction: a_register;
+    addressM = a_register[14:0];
+    assign aluA = (instruction[12] == 1) ? a_register: inM;
   
     // D-Register
-    DRegister #(16) d_register(.in(aluOut), .load(instruction[4]), .out(d_out));
+    assign d_register = (instruction[4]) ? outM: d_register;
   
     // ALU and output 
-    ALU alu(.x(aluA), .y(d_out), .zx(instruction[11]), .nx(instruction[10]), 
-            .zy(instruction[9]), .ny(instruction[8]), .f(instruction[7]), 
-            .no(instruction[6]), .out(aluOut), .zr(zr), .ng(ng));
+//    ALU alu(.x(aluA), .y(d_register), .zx(instruction[11]), .nx(instruction[10]), 
+//            .zy(instruction[9]), .ny(instruction[8]), .f(instruction[7]), 
+//            .no(instruction[6]), .out(aluOut), .zr(zr), .ng(ng));
   
     // Memory output
     assign writeM = (instruction[3] ==1 && instruction[15] == 1);
@@ -55,8 +87,8 @@ module cpu(input logic [15:0] inM, instruction,
     assign gtzr = instruction[0] & po;
     assign jump = lezr | eqzr | gtzr;
     assign do_jump = jmp & instruction[15];
-    PC #(15) pc(.in(a_out), .load(do_jump), .inc(~do_jump), .reset(reset), 
-                .clk(clk), .out(pc));
+//    PC pc(.in(a_register), .load(do_jump), .inc(~do_jump), .reset(reset), 
+//          .clk(clk), .out(pc));
 
     end
 
