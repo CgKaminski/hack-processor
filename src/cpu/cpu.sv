@@ -29,22 +29,23 @@ module cpu(input logic [15:0] inM, instruction,
            output logic [14:0] addressM,
            output logic writeM);
 
-  reg [15:0] a_register;
-  reg [15:0] d_register;
+  logic [15:0] a_register;
+  logic [15:0] d_register;
+  logic [15:0] aluOut;
   logic zr, ng, po, lezr, eqzr, gtzr, jump, a_load;
-  logic jmp, do_jump;
+  logic do_jump;
   logic [15:0] a_instruction, aluA;
 
   alu alu_init (
-    .x(aluA),
-    .y(d_register),
+    .x(d_register),
+    .y(aluA),
     .zx(instruction[11]),
     .nx(instruction[10]),
     .zy(instruction[9]),
     .ny(instruction[8]),
     .f(instruction[7]),
     .no(instruction[6]),
-    .out(outM),
+    .out(aluOut),
     .zr(zr),
     .ng(ng)
   );
@@ -57,38 +58,44 @@ module cpu(input logic [15:0] inM, instruction,
     .clk(clk),
     .out(pc)
   );
+
   always_ff @(posedge clk) begin
     // CPU instruction decoding
     // if (instruction[15] == 0) then A-instruction
     // else C-instruction
-    assign a_instruction = (instruction[15] == 1) ? outM: instruction;
-  
+    a_instruction = (instruction[15]) ? aluOut: instruction;
+
     // A-Register
-    assign a_load = (instruction[15] == 0) ? 1'b1: 1'b0;
-    assign a_register = (a_load) ? a_instruction: a_register;
+    a_load = (instruction[15]) ? instruction[5]: 1'b1;
+    a_register = (a_load) ? a_instruction: a_register;
     addressM = a_register[14:0];
-    assign aluA = (instruction[12] == 1) ? a_register: inM;
+    aluA = (instruction[12]) ? inM: a_register;
   
     // D-Register
-    assign d_register = (instruction[4]) ? outM: d_register;
-  
-    // ALU and output 
-//    ALU alu(.x(aluA), .y(d_register), .zx(instruction[11]), .nx(instruction[10]), 
-//            .zy(instruction[9]), .ny(instruction[8]), .f(instruction[7]), 
-//            .no(instruction[6]), .out(aluOut), .zr(zr), .ng(ng));
+    d_register = (instruction[4]) ? aluOut: d_register;
+    // d_register = 16'b0111111111111111;
   
     // Memory output
-    assign writeM = (instruction[3] ==1 && instruction[15] == 1);
+    writeM = (instruction[3] == 1 & instruction[15] == 1);
   
     // Program counter
-    assign po = ~zr & ~ng;
-    assign lezr = instruction[2] & ng;
-    assign eqzr = instruction[1] & zr;
-    assign gtzr = instruction[0] & po;
-    assign jump = lezr | eqzr | gtzr;
-    assign do_jump = jmp & instruction[15];
-//    PC pc(.in(a_register), .load(do_jump), .inc(~do_jump), .reset(reset), 
-//          .clk(clk), .out(pc));
+    po = ~zr & ~ng;
+    lezr = instruction[2] & ng;
+    eqzr = instruction[1] & zr;
+    gtzr = instruction[0] & po;
+    jump = lezr | eqzr | gtzr;
+    do_jump = jump & instruction[15];
+    
+    // Alu
+    outM <= aluOut;
+
+    $display("aluOut = %h", aluOut);
+    $display("instruction[4] = %h", instruction[4]);
+    $display("a_register = %h", a_register);
+    $display("d_register = %h", d_register);
+    $display("outM = %h", outM);
+    $display("writeM = %h", writeM);
+    $display("aluA = %h", aluA);
 
     end
 
