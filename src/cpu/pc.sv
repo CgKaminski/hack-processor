@@ -7,14 +7,13 @@
  */
 
 module pc(input logic [15:0] in,
-          input logic load, inc, reset, clk,
+          input logic load, reset, clk,
           output logic [15:0] out);
 
   always_ff @(posedge clk)
     if (reset) out <= 0;
     else if (load) out <= in;
-    else if (inc) out <= out + 1;
-    else out <= out;
+    else out <= out + 1;
 
 endmodule
 
