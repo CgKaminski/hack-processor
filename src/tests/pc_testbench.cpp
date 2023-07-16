@@ -10,7 +10,7 @@ int main(int argc, char** argv)
     // Initialize inputs 
     top -> in = 0b0000000000000000;
     top -> load = 0;
-    top -> inc = 0;
+    // top -> inc = 0;
     top -> reset = 0;
     top -> clk = 0;
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
       top -> clk = !top -> clk;
       top -> in = 0b0000000000000000 + i;
       top -> load = 1;
-      top -> inc = 0;
+      // top -> inc = 0;
       top -> reset = 0;
       top -> eval();
       std::cout << "i: " << i << ", out: " << top -> out << std::endl;
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     top -> clk = !top -> clk;
     top -> in = 0b0111010110101111;
     top -> load = 0;
-    top -> inc = 0;
+    // top -> inc = 0;
     top -> reset = 1;
     top -> eval();
     std::cout << "out: " << top -> out << std::endl;
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     top -> clk = !top -> clk;
     top -> in = 0b0000000000000011;
     top -> load = 1; 
-    top -> inc = 0;
+    // top -> inc = 0;
     top -> reset = 0;
     top -> eval();
     std::cout << "out: " << top -> out << std::endl;
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     top -> clk = !top -> clk;
     top -> in = 0b0000111111111111;
     top -> load = 0;
-    top -> inc = 1;
+    // top -> inc = 1;
     top -> reset = 0;
     top -> eval();
     std::cout << "out: " << top -> out << std::endl;
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     top -> clk = !top -> clk;
     top -> in = 0b0000000000000011;
     top -> load = 1;
-    top -> inc = 0;
+    // top -> inc = 0;
     top -> reset = 0;
     top -> eval();
     std::cout << "out: " << top -> out << std::endl;
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     top -> clk = !top -> clk;
     top -> in = 0b0000000000000011;
     top -> load = 1;
-    top -> inc = 0;
+    // top -> inc = 0;
     top -> reset = 0;
     top -> eval();
     std::cout << "out: " << top -> out << std::endl;
