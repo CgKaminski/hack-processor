@@ -20,84 +20,102 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+
 `include "alu.sv"
 `include "pc.sv"
 
 module cpu(input logic [15:0] inM, instruction,
            input logic reset, clk,
            output logic [15:0] outM, pc,
+           output reg [15:0] aRegister, dRegister,
            output logic [14:0] addressM,
            output logic writeM);
 
-  logic [15:0] a_register;
-  logic [15:0] d_register;
-  logic [15:0] aluOut;
-  logic zr, ng, po, lezr, eqzr, gtzr, jump, a_load;
-  logic do_jump;
-  logic [15:0] a_instruction, aluA;
+  // CPU interanl registers (denoted A and D)
+  // reg [15:0] aRegister, dRegister;
+  // Instruction encoding
+  logic i, a, zx, nx, zy, ny, f, no;
+  // Register control
+  logic dA, dD, dM;
+  // Jump encoding
+  logic leJ, eqJ, gtJ;
+  // ALU and Program counter
+  logic [15:0] aluX, aluY, aluOut;
+  logic zr, ng, po, lezr, gtzr, eqzr, jmp, doJmp;
 
+  // Assigning instruction encoding
+  assign i = instruction[15];
+  assign a = instruction[12];
+  assign zx = instruction[11];
+  assign nx = instruction[10];
+  assign zy = instruction[9];
+  assign ny = instruction[8];
+  assign f = instruction[7];
+  assign no = instruction[6];
+  assign dA = instruction[5];
+  assign dD = instruction[4];
+  assign dM = instruction[3];
+  assign leJ = instruction[2];
+  assign eqJ = instruction[1];
+  assign gtJ = instruction[0];
+
+  // ALU input
+  assign aluX = dRegister;
+  assign aluY = (a) ? inM : aRegister;
+
+  // ALU output
   alu alu_init (
-    .x(d_register),
-    .y(aluA),
-    .zx(instruction[11]),
-    .nx(instruction[10]),
-    .zy(instruction[9]),
-    .ny(instruction[8]),
-    .f(instruction[7]),
-    .no(instruction[6]),
+    .x(aluX),
+    .y(aluY),
+    .zx(zx),
+    .nx(nx),
+    .zy(zy),
+    .ny(ny),
+    .f(f),
+    .no(no),
     .out(aluOut),
     .zr(zr),
     .ng(ng)
   );
+  assign outM = aluOut;
+  
+  // Memory address
+  assign writeM = (dM & i) ? 1'b1 : 1'b0;
+  assign addressM = aRegister[14:0];
+
+  // Program counter
+  assign po = ~zr & ~ng;
+  assign lezr = leJ & ng;
+  assign eqzr = eqJ & zr;
+  assign gtzr = gtJ & po;
+  assign jmp = lezr | eqzr | gtzr;
+  assign doJmp = jmp & i;
 
   pc pc_init (
-    .in(a_register),
-    .load(do_jump),
-    .inc(~do_jump),
+    .in(aRegister),
+    .load(doJmp),
     .reset(reset),
     .clk(clk),
     .out(pc)
   );
 
+  // Register A
   always_ff @(posedge clk) begin
-    // CPU instruction decoding
-    // if (instruction[15] == 0) then A-instruction
-    // else C-instruction
-    a_instruction = (instruction[15]) ? aluOut: instruction;
+    if (reset)
+      aRegister <= 0;
+    else if (!i)
+      aRegister <= instruction;
+    else if (dA & i)
+      aRegister <= aluOut;
+  end
 
-    // A-Register
-    a_load = (instruction[15]) ? instruction[5]: 1'b1;
-    a_register = (a_load) ? a_instruction: a_register;
-    addressM = a_register[14:0];
-    aluA = (instruction[12]) ? inM: a_register;
-  
-    // D-Register
-    d_register = (instruction[4]) ? aluOut: d_register;
-    // d_register = 16'b0111111111111111;
-  
-    // Memory output
-    writeM = (instruction[3] == 1 & instruction[15] == 1);
-  
-    // Program counter
-    po = ~zr & ~ng;
-    lezr = instruction[2] & ng;
-    eqzr = instruction[1] & zr;
-    gtzr = instruction[0] & po;
-    jump = lezr | eqzr | gtzr;
-    do_jump = jump & instruction[15];
-    
-    // Alu
-    outM <= aluOut;
-
-    $display("aluOut = %h", aluOut);
-    $display("instruction[4] = %h", instruction[4]);
-    $display("a_register = %h", a_register);
-    $display("d_register = %h", d_register);
-    $display("outM = %h", outM);
-    $display("writeM = %h", writeM);
-    $display("aluA = %h", aluA);
-
-    end
+  // Register D
+  always_ff @(posedge clk) begin
+    if (reset) 
+      dRegister <= 0;
+    else if (dD & i) 
+      dRegister <= aluOut;
+  end
 
   endmodule
 
